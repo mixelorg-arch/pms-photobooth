@@ -6,7 +6,7 @@ import {
 } from '../util.js';
 import {
   table, sheet, field, button, readForm, toast, fail, confirmSheet,
-  twoLine, search, statusTag,
+  twoLine, search, statusTag, stickerCluster,
 } from '../ui.js';
 import { editBooking, newClient } from './scheduling.js';
 
@@ -35,9 +35,12 @@ export default {
 
     root.appendChild(el('div', { class: 'view' }, [
       el('div', { class: 'viewhead' }, [
-        el('div', {}, [
-          el('span', { class: 'cap cap--muted', text: `${store.clients.length} on file` }),
-          el('h1', { text: 'Clients' }),
+        el('div', { class: 'viewhead__title' }, [
+          stickerCluster([['star', 'lavender'], ['camera', 'ember'], ['check', 'mint']]),
+          el('div', {}, [
+            el('span', { class: 'cap cap--muted', text: `${store.clients.length} on file` }),
+            el('h1', { text: 'Clients' }),
+          ]),
         ]),
         el('div', { class: 'row row--tight' }, [
           button('Export CSV', () => exportCSV(rows, cur), { quiet: true }),
@@ -45,15 +48,14 @@ export default {
         ]),
       ]),
 
-      el('div', { class: 'row', style: 'margin-bottom:19px' }, [
+      el('div', { class: 'row', style: 'margin-bottom:24px' }, [
         el('div', { class: 'grow', style: 'max-width:340px' }, [
           search('Search name, company, phone or email…', state.q,
             (v) => { state.q = v; rerender(); }),
         ]),
       ]),
 
-      el('div', { class: 'frame' }, [
-        table([
+      table([
           { label: 'Client', cell: (c) => twoLine(c.name, c.company || '') },
           { label: 'Contact', cell: (c) => twoLine(c.phone || '—', c.email || '') },
           { label: 'Last event', cell: (c) => c.last
@@ -68,7 +70,6 @@ export default {
           onRow: (c) => editClient(store.client(c.id)),
           empty: state.q ? 'No client matches that search.' : 'No clients yet.',
         }),
-      ]),
     ]));
   },
 };
@@ -90,8 +91,8 @@ function editClient(client) {
 
   const body = el('div', { class: 'stack' }, [
     form,
-    el('section', { class: 'frame', style: 'padding:19px' }, [
-      el('div', { class: 'panel__head' }, [
+    el('section', { class: 'card', style: 'padding:24px' }, [
+      el('div', { class: 'card__head' }, [
         el('span', { class: 'cap cap--muted', text: `Bookings — ${theirs.length}` }),
         button('New booking', () => { s.close(); editBooking(null, { client_id: client.id }); },
           { quiet: true }),

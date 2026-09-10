@@ -110,12 +110,36 @@ computes every join and total in JavaScript so both adapters behave identically.
 
 ## Design
 
-Built to the [Thomas Hedger "Silent frame, loud prints"](https://styles.refero.design/style/9fe18d8b-58b7-404d-bcc6-9e8a73b8862c)
-reference: a closed two-tone palette (`#ffffff`, `#000000`, `#29242b`, `#e5e5e5`), zero
-border radius, zero shadows, and a strict 9 / 13 / 19 / 26 px type scale.
+Built to the [Slush "inflatable sticker universe on pastel paper"](https://styles.refero.design/style/8b6b547f-a357-4f1b-9842-4579c62dd42b)
+reference:
 
-The reference forbids semantic colour, so **state is carried by fill and weight instead
-of hue** — a confirmed booking is a filled black label, an inquiry is a dashed outline,
-a cancelled one is struck through. Charts are hairline bars for the same reason. This is
-a deliberate reading of the system rather than a departure from it; if you want a green
-"paid" badge, that is the one rule you would be breaking.
+- **Pastel ground, paper sheet.** The page sits on Sky Wash `#dceeff`; the app
+  body is one 30px-rounded white sheet outlined in 1px black.
+- **Hand-cut outlines.** Every card, control, tag and sticker carries a 1px
+  `#000000` border. That outline is the visual language, not a fallback.
+- **Pill everything.** Buttons, nav links, tags and calendar events are fully
+  rounded; cards are 20px and sheets 40px. Nothing is square.
+- **The six-colour sticker palette used as a set** — Electric Blue, Mint Pop,
+  Lavender, Ember, Sunburst, Voltage Violet — appears as card washes, tag fills
+  and bar fills, several per screen, rather than one chosen "brand accent".
+- **No shadows, no gradients.** Depth comes from colour bands and black outlines.
+- **Display type.** Anton (standing in for Lateral, from the reference's own
+  fallback list) at crushed 0.8 line-height for page titles, the invoice
+  masthead and the hero figure. Body text is Inter for Aeonik Pro, 500/700, with
+  0.032em tracking on uppercase UI labels.
+- **The marquee earns its place.** The reference's scrolling black band carries
+  the business's live numbers — next event, events this week, outstanding
+  balance, items to reorder — instead of a slogan.
+
+Two judgement calls worth knowing about:
+
+**Colour is decoration, and the label always carries the meaning.** The
+reference is explicit that green is "a sticker accent, not a semantic state".
+Booking and invoice status tags do take consistent sticker fills so they are
+learnable at a glance, but the word is always printed in the tag — the app reads
+identically in greyscale, on a mono printer, or to a colour-blind user. No state
+is encoded in hue alone.
+
+**CTAs are black-fill or outlined-black only.** Electric Blue is a decorative
+surface colour in this system, never an action colour, so no button or link is
+ever blue.

@@ -3,7 +3,8 @@
 import { store } from '../store.js';
 import { el, money, num, matches, sortBy, sum, titleCase, toCSV, downloadText } from '../util.js';
 import { table, panel, sheet, field, button, readForm, toast, fail,
-         confirmSheet, tag, twoLine, search, segment } from '../ui.js';
+         confirmSheet, tag, twoLine, search, segment, stickerCluster,
+} from '../ui.js';
 
 const state = { q: '', show: 'active' };
 
@@ -32,9 +33,12 @@ export default {
 
     root.appendChild(el('div', { class: 'view' }, [
       el('div', { class: 'viewhead' }, [
-        el('div', {}, [
-          el('span', { class: 'cap cap--muted', text: `${live.length} active · average ${money(avg, cur)}` }),
-          el('h1', { text: 'Packages' }),
+        el('div', { class: 'viewhead__title' }, [
+          stickerCluster([['ticket', 'lavender'], ['camera', 'mint'], ['star', 'sun']]),
+          el('div', {}, [
+            el('span', { class: 'cap cap--muted', text: `${live.length} active · average ${money(avg, cur)}` }),
+            el('h1', { text: 'Packages' }),
+          ]),
         ]),
         el('div', { class: 'row row--tight' }, [
           button('Export CSV', () => exportCSV(all, cur), { quiet: true }),
@@ -42,7 +46,7 @@ export default {
         ]),
       ]),
 
-      el('div', { class: 'row', style: 'margin-bottom:19px' }, [
+      el('div', { class: 'row', style: 'margin-bottom:24px' }, [
         el('div', { class: 'grow', style: 'max-width:340px' }, [
           search('Search name, code or inclusion…', state.q, (v) => { state.q = v; rerender(); }),
         ]),
@@ -50,20 +54,18 @@ export default {
           state.show, (v) => { state.show = v; rerender(); }),
       ]),
 
-      el('div', { class: 'frame' }, [
-        table([
+      table([
           { label: 'Package', cell: (p) => twoLine(p.name, p.code) },
           { label: 'Inclusions', cell: (p) => inclusionList(p) },
           { label: 'Duration', cell: (p) => `${num(p.duration_hours)} hrs` },
           { label: 'Booked', cell: (p) => `${usage.get(String(p.id)) || 0}×` },
           { label: 'Status', cell: (p) => tag(p.active === false ? 'archived' : 'active',
-              p.active === false ? 'ghost' : 'solid') },
+              p.active === false ? 'mist' : 'mint') },
           { label: 'Price', align: 'right', cell: (p) => money(p.price, cur) },
         ], rows, {
           onRow: (p) => edit(p),
           empty: state.q ? 'No package matches that search.' : 'No packages yet. Add your first one.',
         }),
-      ]),
     ]));
   },
 };

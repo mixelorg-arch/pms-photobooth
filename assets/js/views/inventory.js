@@ -8,7 +8,7 @@ import {
 } from '../util.js';
 import {
   table, panel, stat, sheet, field, button, readForm, toast, fail, confirmSheet,
-  tag, twoLine, search, segment, keyValue,
+  tag, twoLine, search, segment, keyValue, stickerCluster,
 } from '../ui.js';
 
 const state = { q: '', category: 'all', lowOnly: false };
@@ -35,10 +35,13 @@ export default {
 
     root.appendChild(el('div', { class: 'view' }, [
       el('div', { class: 'viewhead' }, [
-        el('div', {}, [
-          el('span', { class: 'cap cap--muted',
-            text: `${all.length} items · ${low.length} at or below reorder level` }),
-          el('h1', { text: 'Inventory' }),
+        el('div', { class: 'viewhead__title' }, [
+          stickerCluster([['box', 'blue'], ['coin', 'sun'], ['check', 'mint']]),
+          el('div', {}, [
+            el('span', { class: 'cap cap--muted',
+              text: `${all.length} items · ${low.length} at or below reorder level` }),
+            el('h1', { text: 'Inventory' }),
+          ]),
         ]),
         el('div', { class: 'row row--tight' }, [
           button('Export CSV', () => exportCSV(all, cur), { quiet: true }),
@@ -46,27 +49,29 @@ export default {
         ]),
       ]),
 
-      el('div', { class: 'mosaic cols-4', style: 'margin-bottom:19px' }, [
-        stat('Stock value', money(stockValue, cur), 'quantity × unit cost', { large: true }),
+      el('div', { class: 'grid cols-4', style: 'margin-bottom:24px' }, [
+        stat('Stock value', money(stockValue, cur), 'quantity × unit cost',
+          { large: true, wash: 'blue' }),
         stat('Items tracked', String(all.length), `${consumables.length} consumable lines`),
         stat('Need reorder', String(low.length),
-          low.length ? low.slice(0, 2).map((i) => i.name).join(', ') : 'Everything above level'),
+          low.length ? low.slice(0, 2).map((i) => i.name).join(', ') : 'Everything above level',
+          { wash: low.length ? 'sun' : null }),
         stat('Movements logged', String(store.inventory_movements.length), 'in + out entries'),
       ]),
 
       low.length
-        ? el('div', { class: 'frame', style: 'padding:19px;margin-bottom:19px' }, [
+        ? el('div', { class: 'card card--wash-sun', style: 'margin-bottom:24px' }, [
             el('span', { class: 'cap', text: 'Reorder now' }),
-            el('div', { class: 'row', style: 'margin-top:9px' }, low.map((i) =>
+            el('div', { class: 'row', style: 'margin-top:12px' }, low.map((i) =>
               el('button', {
-                class: 'tag tag--solid', style: 'cursor:pointer',
+                class: 'tag', type: 'button',
                 text: `${i.name} — ${num(i.quantity)} ${i.unit} left`,
                 onclick: () => moveStock(i),
               }))),
           ])
         : null,
 
-      el('div', { class: 'row', style: 'margin-bottom:19px' }, [
+      el('div', { class: 'row', style: 'margin-bottom:24px' }, [
         el('div', { class: 'grow', style: 'max-width:320px' }, [
           search('Search item, SKU or location…', state.q, (v) => { state.q = v; rerender(); }),
         ]),
@@ -77,7 +82,7 @@ export default {
           { solid: state.lowOnly, quiet: !state.lowOnly }),
       ]),
 
-      el('div', { class: 'frame', style: 'margin-bottom:19px' }, [
+      el('div', { style: 'margin-bottom:24px' }, [
         table([
           { label: 'Item', cell: (i) => twoLine(i.name, i.sku || '') },
           { label: 'Category', cell: (i) => titleCase(i.category) },
@@ -89,7 +94,7 @@ export default {
             } },
           { label: 'Reorder at', align: 'right', cell: (i) => `${num(i.reorder_level)} ${i.unit}` },
           { label: 'Level', cell: (i) => num(i.quantity) <= num(i.reorder_level)
-              ? tag('reorder', 'solid') : tag('ok', 'ghost') },
+              ? tag('reorder', 'ember') : tag('ok', 'mint') },
           { label: 'Value', align: 'right', cell: (i) => money(num(i.quantity) * num(i.unit_cost), cur) },
           { label: '', align: 'right', cell: (i) =>
               button('Stock in/out', () => moveStock(i), { quiet: true }) },
@@ -171,8 +176,8 @@ function editItem(item) {
     const history = sortBy(
       store.inventory_movements.filter((m) => String(m.item_id) === String(item.id)),
       (m) => m.created_at || '', -1);
-    body.appendChild(el('section', { class: 'frame', style: 'padding:19px' }, [
-      el('div', { class: 'panel__head' }, [
+    body.appendChild(el('section', { class: 'card', style: 'padding:24px' }, [
+      el('div', { class: 'card__head' }, [
         el('span', { class: 'cap cap--muted', text: `Movement history — ${history.length} entries` }),
         button('Stock in/out', () => { s.close(); moveStock(item); }, { quiet: true }),
       ]),

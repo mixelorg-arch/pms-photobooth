@@ -36,6 +36,15 @@ function scrub(table, row) {
 const LS_KEY = 'pms.photobooth.local.v1';
 const LS_MODE = 'pms.photobooth.mode';
 
+/**
+ * Rows handed to the caller are copies. Without this the store's cache and the
+ * persisted rows are the same objects, so any write-through mutation (notably
+ * afterMovement) lands twice — once in storage, once in the cache.
+ */
+const clone = (v) => (typeof structuredClone === 'function'
+  ? structuredClone(v)
+  : JSON.parse(JSON.stringify(v)));
+
 const localState = {
   data: null,
   load() {
@@ -67,7 +76,7 @@ function computeGenerated(table, row) {
 const localAdapter = {
   mode: 'local',
   async select(table) {
-    return [...(localState.load()[table] || [])];
+    return clone(localState.load()[table] || []);
   },
   async insert(table, row) {
     const data = localState.load();
@@ -80,7 +89,7 @@ const localAdapter = {
     });
     data[table].push(rec);
     localState.save();
-    return rec;
+    return clone(rec);
   },
   async update(table, id, patch) {
     const data = localState.load();
@@ -91,7 +100,7 @@ const localAdapter = {
       ...list[i], ...scrub(table, patch), updated_at: new Date().toISOString(),
     });
     localState.save();
-    return list[i];
+    return clone(list[i]);
   },
   async remove(table, id) {
     const data = localState.load();

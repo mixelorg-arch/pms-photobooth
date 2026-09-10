@@ -6,7 +6,7 @@ import {
   titleCase, MONTHS_SHORT, toCSV, downloadText,
 } from '../util.js';
 import {
-  table, panel, stat, bars, segment, search, button, tag, twoLine, toast, fail,
+  table, panel, stat, bars, segment, search, button, tag, statusTag, twoLine, toast, fail, stickerCluster,
 } from '../ui.js';
 import { editBooking } from './scheduling.js';
 
@@ -81,23 +81,28 @@ export default {
 
     root.appendChild(el('div', { class: 'view' }, [
       el('div', { class: 'viewhead' }, [
-        el('div', {}, [
-          el('span', { class: 'cap cap--muted', text: `${periodLabel} · ${fmtDate(from)} – ${fmtDate(to)}` }),
-          el('h1', { text: 'Sales' }),
+        el('div', { class: 'viewhead__title' }, [
+          stickerCluster([['coin', 'sun'], ['bolt', 'ember'], ['check', 'mint']]),
+          el('div', {}, [
+            el('span', { class: 'cap cap--muted', text: `${periodLabel} · ${fmtDate(from)} – ${fmtDate(to)}` }),
+            el('h1', { text: 'Sales' }),
+          ]),
         ]),
         segment([['month', 'This month'], ['last', 'Last month'], ['quarter', 'Quarter'],
           ['year', 'Year'], ['all', 'All time']], state.period,
           (v) => { state.period = v; rerender(); }),
       ]),
 
-      el('div', { class: 'mosaic cols-4', style: 'margin-bottom:19px' }, [
-        stat('Collected', money(collected, cur), `${inPeriod.length} payments`, { large: true }),
+      el('div', { class: 'grid cols-4', style: 'margin-bottom:24px' }, [
+        stat('Collected', money(collected, cur), `${inPeriod.length} payments`,
+          { large: true, wash: 'mint' }),
         stat('Booked value', money(booked, cur), `${eventsInPeriod.length} events dated in period`),
-        stat('Outstanding', money(outstanding, cur), `${receivables.length} bookings owing`),
+        stat('Outstanding', money(outstanding, cur), `${receivables.length} bookings owing`,
+          { wash: outstanding > 0 ? 'sun' : null }),
         stat('Average event', money(avgValue, cur), `${settledEvents.length} completed`),
       ]),
 
-      el('div', { class: 'mosaic cols-3', style: 'margin-bottom:19px' }, [
+      el('div', { class: 'grid cols-3', style: 'margin-bottom:24px' }, [
         panel('Received by month — last 12',
           bars(months, { format: (v) => compact(v, cur) })),
         panel(`By package — ${periodLabel.toLowerCase()}`,
@@ -110,7 +115,7 @@ export default {
             : el('p', { class: 'empty', text: 'No payments in this period.' })),
       ]),
 
-      el('div', { class: 'panel__head' }, [
+      el('div', { class: 'card__head' }, [
         el('span', { class: 'cap cap--muted',
           text: `Payment ledger — ${ledger.length} entries${refunds ? ` · ${money(refunds, cur)} refunded` : ''}` }),
         el('div', { class: 'row row--tight' }, [
@@ -123,11 +128,11 @@ export default {
         ]),
       ]),
 
-      el('div', { class: 'frame', style: 'margin-bottom:19px' }, [
+      el('div', { style: 'margin-bottom:24px' }, [
         table([
           { label: 'Date', cell: (p) => fmtDate(p.paid_on) },
           { label: 'Client', cell: (p) => twoLine(p.client_name, p.reference) },
-          { label: 'Kind', cell: (p) => tag(p.kind, p.kind === 'refund' ? 'ghost' : 'plain') },
+          { label: 'Kind', cell: (p) => tag(p.kind, p.kind === 'refund' ? 'ember' : 'sky') },
           { label: 'Method', cell: (p) => titleCase(p.method) },
           { label: 'Reference', cell: (p) => p.pay_ref || '—' },
           { label: 'Amount', align: 'right', cell: (p) => money(p.amount, cur) },
@@ -137,18 +142,17 @@ export default {
         }),
       ]),
 
-      el('div', { class: 'panel__head' }, [
+      el('div', { class: 'card__head' }, [
         el('span', { class: 'cap cap--muted',
           text: `Receivables — ${money(outstanding, cur)} across ${receivables.length} bookings` }),
         button('Export CSV', () => exportReceivables(receivables, cur), { quiet: true }),
       ]),
 
-      el('div', { class: 'frame' }, [
-        table([
+      table([
           { label: 'Event date', cell: (b) => fmtDate(b.event_date, 'dow') },
           { label: 'Client', cell: (b) => twoLine(b.client_name, b.reference) },
           { label: 'Package', cell: (b) => b.package_name },
-          { label: 'Status', cell: (b) => tag(b.status, b.status === 'confirmed' ? 'solid' : 'ghost') },
+          { label: 'Status', cell: (b) => statusTag(b.status) },
           { label: 'Total', align: 'right', cell: (b) => money(b.total_amount, cur) },
           { label: 'Paid', align: 'right', cell: (b) => money(b.amount_paid, cur) },
           { label: 'Balance', align: 'right', cell: (b) => el('strong', { text: money(b.balance_due, cur) }) },
@@ -156,7 +160,6 @@ export default {
           onRow: (b) => editBooking(store.booking(b.id)),
           empty: 'Everything is settled.',
         }),
-      ]),
     ]));
   },
 };

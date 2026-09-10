@@ -3,8 +3,9 @@
 import { APP_NAME, APP_SUB } from './config.js';
 import { db } from './db.js';
 import { store } from './store.js';
-import { el, $ } from './util.js';
-import { sheet, field, button, readForm, toast, fail, confirmSheet } from './ui.js';
+import { el, $, money, num, sum, fmtDate, daysFromToday } from './util.js';
+import { sheet, field, button, readForm, toast, fail, confirmSheet, tag,
+         stickerCluster } from './ui.js';
 
 import dashboard from './views/dashboard.js';
 import scheduling from './views/scheduling.js';
@@ -24,12 +25,40 @@ if (!byId.has(current)) current = 'dashboard';
 
 /* --------------------------------------------------------------- shell */
 
+/** The marquee band carries today's live numbers rather than a slogan. */
+function marqueeLine() {
+  const cur = store.currency;
+  const upcoming = store.upcoming();
+  const week = upcoming.filter((b) => daysFromToday(b.event_date) <= 7);
+  const next = upcoming[0];
+  const low = store.lowStock();
+
+  return [
+    store.settings?.company_name || 'PMS Photobooth',
+    next ? `Next up — ${next.client_name}, ${fmtDate(next.event_date, 'long')}` : 'No events booked',
+    `${week.length} event${week.length === 1 ? '' : 's'} within 7 days`,
+    `${money(store.outstanding(), cur)} outstanding`,
+    low.length ? `${low.length} item${low.length === 1 ? '' : 's'} to reorder` : 'Stock levels healthy',
+  ].join('  ●  ');
+}
+
 function renderShell() {
   const app = root();
   app.replaceChildren();
 
+  const line = marqueeLine();
+  app.appendChild(el('div', { class: 'marquee no-print' }, [
+    // The track holds the line twice so the -50% loop is seamless.
+    el('div', { class: 'marquee__track' }, [
+      el('span', { text: line }), el('span', { text: line }),
+    ]),
+  ]));
+
   app.appendChild(el('nav', { class: 'nav no-print' }, [
-    el('a', { class: 'nav__mark', href: '#dashboard', html: `${APP_NAME} <span>${APP_SUB}</span>` }),
+    el('a', { class: 'nav__mark', href: '#dashboard' }, [
+      el('span', { class: 'nav__badge', text: 'P' }),
+      el('span', { text: `${APP_NAME} ${APP_SUB}` }),
+    ]),
     el('div', { class: 'nav__links' }, VIEWS.map((v) =>
       el('a', {
         class: 'nav__link',
@@ -39,7 +68,7 @@ function renderShell() {
       }))),
     el('div', { class: 'nav__right' }, [
       db.isLocal
-        ? el('span', { class: 'tag tag--rule', text: 'Demo data' })
+        ? tag('Demo data', 'sun')
         : el('span', { class: 'cap cap--muted', text: db.user?.email || '' }),
       el('button', { class: 'nav__link', text: 'Settings', onclick: openSettings }),
       el('button', {
@@ -186,8 +215,11 @@ function renderGate(reachable) {
 
   app.appendChild(el('div', { class: 'gate' }, [
     el('div', { class: 'gate__box' }, [
+      el('div', { class: 'row', style: 'margin-bottom:20px' }, [
+        stickerCluster([['camera', 'ember'], ['coin', 'sun'], ['star', 'violet']]),
+      ]),
       el('span', { class: 'cap cap--muted', text: 'Photobooth Booking Management' }),
-      el('h1', { text: `${APP_NAME} ${APP_SUB}`, style: 'margin:5px 0 19px' }),
+      el('h1', { text: `${APP_NAME} ${APP_SUB}`, style: 'margin:8px 0 24px' }),
 
       reachable
         ? el('div', { class: 'stack' }, [
@@ -195,18 +227,17 @@ function renderGate(reachable) {
             el('div', { class: 'row row--tight' }, [submit]),
             status,
           ])
-        : el('p', { class: 'alt', style: 'margin:0 0 19px',
+        : el('p', { class: 'alt', style: 'margin:0 0 24px',
             text: 'Supabase could not be reached from this browser. You can still explore the app with demo data held locally.' }),
 
-      el('div', { style: 'border-top:1px solid var(--ash);margin-top:19px;padding-top:19px' }, [
-        el('span', { class: 'cap cap--muted', text: 'No account yet?' }),
-        el('p', { class: 'alt', style: 'margin:5px 0 13px' }, [
-          'Add a user under Authentication → Users in the Supabase dashboard, then run ',
-          el('code', { text: 'supabase/schema.sql' }),
-          ' once in the SQL editor.',
-        ]),
-        button('Explore with demo data', () => { db.useLocal(); boot(); }, { quiet: true }),
+      el('hr', { class: 'gate__rule' }),
+      el('span', { class: 'cap cap--muted', text: 'No account yet?' }),
+      el('p', { class: 'alt', style: 'margin:8px 0 16px' }, [
+        'Add a user under Authentication → Users in the Supabase dashboard, then run ',
+        el('code', { text: 'supabase/schema.sql' }),
+        ' once in the SQL editor.',
       ]),
+      button('Explore with demo data', () => { db.useLocal(); boot(); }, { quiet: true }),
     ]),
   ]));
 

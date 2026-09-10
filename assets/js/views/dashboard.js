@@ -5,7 +5,8 @@ import {
   el, money, compact, num, sum, sortBy, todayISO, toISO, fmtDate, fmtTime, relativeDay,
   daysFromToday, monthKey, monthLabel, MONTHS_SHORT, titleCase,
 } from '../util.js';
-import { table, panel, stat, bars, button, tag, statusTag, twoLine } from '../ui.js';
+import { table, panel, stat, bars, button, tag, statusTag, twoLine, stickerCluster,
+} from '../ui.js';
 import { editBooking, addPayment } from './scheduling.js';
 import { openInvoiceFor } from './invoices.js';
 import { moveStock } from './inventory.js';
@@ -50,9 +51,12 @@ export default {
 
     root.appendChild(el('div', { class: 'view' }, [
       el('div', { class: 'viewhead' }, [
-        el('div', {}, [
-          el('span', { class: 'cap cap--muted', text: fmtDate(todayISO(), 'dow') }),
-          el('h1', { text: store.settings?.company_name || 'Dashboard' }),
+        el('div', { class: 'viewhead__title' }, [
+          stickerCluster([['star', 'violet'], ['coin', 'sun'], ['bolt', 'ember']]),
+          el('div', {}, [
+            el('span', { class: 'cap cap--muted', text: fmtDate(todayISO(), 'dow') }),
+            el('h1', { text: store.settings?.company_name || 'Dashboard' }),
+          ]),
         ]),
         el('div', { class: 'row row--tight' }, [
           button('New booking', () => editBooking(null), { solid: true }),
@@ -60,42 +64,45 @@ export default {
       ]),
 
       /* ---- headline figures ---- */
-      el('div', { class: 'mosaic cols-4', style: 'margin-bottom:19px' }, [
+      el('div', { class: 'grid cols-4', style: 'margin-bottom:24px' }, [
         stat('Collected this month', money(collected, cur),
           delta === null ? 'No prior month to compare'
             : `${delta >= 0 ? '+' : ''}${delta.toFixed(0)}% vs ${monthLabel(new Date(now.getFullYear(), now.getMonth() - 1, 1)).split(' ')[0]}`,
-          { large: true }),
+          { large: true, wash: 'mint' }),
         stat('Events next 30 days', String(next30.length),
-          thisWeek.length ? `${thisWeek.length} within 7 days` : 'Nothing this week'),
+          thisWeek.length ? `${thisWeek.length} within 7 days` : 'Nothing this week',
+          { wash: 'blue' }),
         stat('Outstanding balance', money(outstanding, cur),
-          overdue.length ? `${overdue.length} past events still owing` : 'No past events owing'),
+          overdue.length ? `${overdue.length} past events still owing` : 'No past events owing',
+          { wash: 'lavender' }),
         stat('Low stock', String(low.length),
-          low.length ? low[0].name : 'All items above reorder level'),
+          low.length ? low[0].name : 'All items above reorder level',
+          { wash: low.length ? 'sun' : 'mist' }),
       ]),
 
       /* ---- attention strip ---- */
       (unconfirmed.length || overdue.length || low.length)
-        ? el('div', { class: 'frame', style: 'padding:19px;margin-bottom:19px' }, [
+        ? el('div', { class: 'card card--wash-blue', style: 'margin-bottom:24px' }, [
             el('span', { class: 'cap', text: 'Needs attention' }),
-            el('div', { class: 'row', style: 'margin-top:9px' }, [
+            el('div', { class: 'row', style: 'margin-top:12px' }, [
               ...unconfirmed.slice(0, 4).map((b) => chip(
                 `Unconfirmed · ${b.client_name} · ${fmtDate(b.event_date, 'short')}`,
-                () => editBooking(store.booking(b.id)))),
+                'sun', () => editBooking(store.booking(b.id)))),
               ...overdue.slice(0, 4).map((b) => chip(
                 `Unpaid · ${b.client_name} · ${money(b.balance_due, cur)}`,
-                () => addPayment(store.booking(b.id)))),
+                'lavender', () => addPayment(store.booking(b.id)))),
               ...low.slice(0, 4).map((i) => chip(
                 `Reorder · ${i.name} · ${num(i.quantity)} ${i.unit}`,
-                () => moveStock(i))),
+                'ember', () => moveStock(i))),
             ]),
           ])
         : null,
 
       /* ---- next events ---- */
-      el('div', { class: 'mosaic cols-2', style: 'margin-bottom:19px' }, [
+      el('div', { class: 'grid cols-2', style: 'margin-bottom:24px' }, [
         panel(`Next events — ${upcoming.length} scheduled`,
           table([
-            { label: 'When', cell: (b) => twoLine(fmtDate(b.event_date, 'dow'),
+            { label: 'When', cell: (b) => twoLine(fmtDate(b.event_date),
                 `${fmtTime(b.start_time)} · ${relativeDay(b.event_date)}`) },
             { label: 'Client', cell: (b) => twoLine(b.client_name, b.package_name) },
             { label: 'Venue', cell: (b) => b.venue || '—' },
@@ -112,9 +119,9 @@ export default {
         panel('Cash received — last 6 months',
           el('div', { class: 'stack' }, [
             bars(months, { format: (v) => compact(v, cur) }),
-            el('div', { style: 'margin-top:19px' }, [
+            el('div', { style: 'margin-top:24px' }, [
               el('span', { class: 'cap cap--muted', text: 'Booked value by stage' }),
-              el('div', { style: 'margin-top:9px' }, [
+              el('div', { style: 'margin-top:12px' }, [
                 bars(pipeline, { format: (v) => compact(v, cur) }),
               ]),
             ]),
@@ -122,7 +129,7 @@ export default {
       ]),
 
       /* ---- lower band ---- */
-      el('div', { class: 'mosaic cols-2' }, [
+      el('div', { class: 'grid cols-2' }, [
         panel('Recent payments',
           table([
             { label: 'Date', cell: (p) => fmtDate(p.paid_on) },
@@ -147,5 +154,5 @@ export default {
   },
 };
 
-const chip = (text, onclick) =>
-  el('button', { class: 'tag', style: 'cursor:pointer', text, onclick });
+const chip = (text, tone, onclick) =>
+  el('button', { class: `tag tag--${tone}`, type: 'button', text, onclick });

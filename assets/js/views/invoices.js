@@ -8,7 +8,7 @@ import {
 } from '../util.js';
 import {
   table, panel, stat, sheet, field, button, readForm, toast, fail, confirmSheet,
-  invoiceTag, tag, twoLine, search, segment,
+  invoiceTag, tag, twoLine, search, segment, stickerCluster,
 } from '../ui.js';
 
 const state = { q: '', status: 'all' };
@@ -47,10 +47,13 @@ export default {
 
     root.appendChild(el('div', { class: 'view' }, [
       el('div', { class: 'viewhead' }, [
-        el('div', {}, [
-          el('span', { class: 'cap cap--muted',
-            text: `${store.invoices.length} invoices · ${unpaid.length} awaiting payment` }),
-          el('h1', { text: 'Invoices' }),
+        el('div', { class: 'viewhead__title' }, [
+          stickerCluster([['ticket', 'violet'], ['coin', 'sun'], ['check', 'mint']]),
+          el('div', {}, [
+            el('span', { class: 'cap cap--muted',
+              text: `${store.invoices.length} invoices · ${unpaid.length} awaiting payment` }),
+            el('h1', { text: 'Invoices' }),
+          ]),
         ]),
         el('div', { class: 'row row--tight' }, [
           button('Export CSV', () => exportCSV(rows, cur), { quiet: true }),
@@ -58,26 +61,27 @@ export default {
         ]),
       ]),
 
-      el('div', { class: 'mosaic cols-3', style: 'margin-bottom:19px' }, [
-        stat('Issued', money(issuedValue, cur), `${issued.length} sent or paid`, { large: true }),
+      el('div', { class: 'grid cols-3', style: 'margin-bottom:24px' }, [
+        stat('Issued', money(issuedValue, cur), `${issued.length} sent or paid`,
+          { large: true, wash: 'lavender' }),
         stat('Awaiting payment', money(unpaidValue, cur), `${unpaid.length} invoices`),
         stat('Not yet invoiced', String(uninvoiced.length),
           uninvoiced.length ? 'Bookings with no live invoice' : 'Every booking is invoiced'),
       ]),
 
       uninvoiced.length
-        ? el('div', { class: 'frame', style: 'padding:19px;margin-bottom:19px' }, [
+        ? el('div', { class: 'card card--wash-lavender', style: 'margin-bottom:24px' }, [
             el('span', { class: 'cap', text: 'Bookings without an invoice' }),
-            el('div', { class: 'row', style: 'margin-top:9px' },
+            el('div', { class: 'row', style: 'margin-top:12px' },
               uninvoiced.slice(0, 8).map((b) => el('button', {
-                class: 'tag', style: 'cursor:pointer',
+                class: 'tag', type: 'button',
                 text: `${b.reference} · ${b.client_name} · ${money(b.total_amount, cur)}`,
                 onclick: () => openInvoiceFor(store.booking(b.id)),
               }))),
           ])
         : null,
 
-      el('div', { class: 'row', style: 'margin-bottom:19px' }, [
+      el('div', { class: 'row', style: 'margin-bottom:24px' }, [
         el('div', { class: 'grow', style: 'max-width:320px' }, [
           search('Search number, client or booking…', state.q, (v) => { state.q = v; rerender(); }),
         ]),
@@ -85,8 +89,7 @@ export default {
           (v) => { state.status = v; rerender(); }),
       ]),
 
-      el('div', { class: 'frame' }, [
-        table([
+      table([
           { label: 'Number', cell: (i) => twoLine(i.number, fmtDate(i.issue_date)) },
           { label: 'Client', cell: (i) => twoLine(i.client_name, i.booking_ref) },
           { label: 'Due', cell: (i) => i.due_date ? fmtDate(i.due_date) : '—' },
@@ -101,7 +104,6 @@ export default {
           onRow: (i) => previewInvoice(store.invoice(i.id)),
           empty: 'No invoices yet. Create one from a booking.',
         }),
-      ]),
     ]));
   },
 };
@@ -116,20 +118,18 @@ function pickBooking() {
   const body = el('div', { class: 'stack' }, [
     el('p', { class: 'alt', style: 'margin:0',
       text: 'Pick the booking to invoice. Lines are drafted from its package and add-ons; you can edit them after.' }),
-    el('div', { class: 'frame' }, [
-      table([
+    table([
         { label: 'Booking', cell: (b) => twoLine(b.reference, fmtDate(b.event_date, 'dow')) },
         { label: 'Client', cell: (b) => b.client_name },
         { label: 'Package', cell: (b) => b.package_name },
         { label: 'Invoiced', cell: (b) => store.invoices.some(
             (i) => String(i.booking_id) === String(b.id) && i.status !== 'void')
-              ? tag('yes', 'solid') : tag('no', 'ghost') },
+              ? tag('yes', 'mint') : tag('no', 'sun') },
         { label: 'Total', align: 'right', cell: (b) => money(b.total_amount, cur) },
       ], options, {
         onRow: (b) => { s.close(); openInvoiceFor(store.booking(b.id)); },
         empty: 'No bookings to invoice yet.',
       }),
-    ]),
   ]);
 
   const s = sheet({
@@ -229,8 +229,8 @@ function editInvoice(invoice) {
   }));
   if (!lines.length) lines = [{ id: null, description: '', quantity: 1, unit_price: 0 }];
 
-  const linesBox = el('div', { class: 'stack', style: 'gap:9px' });
-  const totalsBox = el('div', { class: 'frame', style: 'padding:13px 19px' });
+  const linesBox = el('div', { class: 'stack', style: 'gap:12px' });
+  const totalsBox = el('div', { class: 'card', style: 'padding:16px 24px' });
 
   function totals() {
     const subtotal = sum(lines, (l) => num(l.quantity) * num(l.unit_price));
@@ -275,7 +275,7 @@ function editInvoice(invoice) {
       price.addEventListener('input', recalc);
 
       return el('div', {
-        class: 'frame',
+        class: 'card',
         style: 'display:grid;grid-template-columns:minmax(0,3fr) 90px 130px 130px 40px;gap:9px;padding:9px;align-items:start',
       }, [
         desc, qty, price,
@@ -297,7 +297,7 @@ function editInvoice(invoice) {
   const body = el('div', { class: 'stack' }, [
     form,
     el('div', {}, [
-      el('div', { class: 'panel__head' }, [
+      el('div', { class: 'card__head' }, [
         el('span', { class: 'cap cap--muted', text: 'Line items' }),
         el('div', { class: 'row row--tight' }, [
           booking ? button('Reload from booking', () => {
@@ -330,7 +330,7 @@ function editInvoice(invoice) {
         el('span', { text: 'Unit price' }), el('span', { class: 'right', text: 'Amount' }), el('span'),
       ]),
       linesBox,
-      el('div', { style: 'margin-top:19px' }, [totalsBox]),
+      el('div', { style: 'margin-top:24px' }, [totalsBox]),
     ]),
   ]);
 
@@ -507,15 +507,15 @@ function renderDocument(invoice) {
     ].filter(Boolean)),
 
     el('footer', { class: 'doc__foot' }, [
-      invoice.notes ? el('div', { style: 'margin-bottom:9px', text: invoice.notes }) : null,
+      invoice.notes ? el('div', { style: 'margin-bottom:12px', text: invoice.notes }) : null,
       invoice.terms ? el('div', { text: invoice.terms }) : null,
-      st.bank_details ? el('div', { style: 'margin-top:9px', text: st.bank_details }) : null,
-      el('div', { style: 'margin-top:19px', text: `Thank you — ${st.company_name || 'PMS Photobooth'}` }),
+      st.bank_details ? el('div', { style: 'margin-top:12px', text: st.bank_details }) : null,
+      el('div', { style: 'margin-top:24px', text: `Thank you — ${st.company_name || 'PMS Photobooth'}` }),
     ].filter(Boolean)),
   ]);
 }
 
-const row = (k, v) => el('div', { style: 'margin-bottom:5px' }, [
+const row = (k, v) => el('div', { style: 'margin-bottom:8px' }, [
   el('span', { class: 'cap cap--muted', text: k }),
   el('div', { class: 'alt', text: v }),
 ]);

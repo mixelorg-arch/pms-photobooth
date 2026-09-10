@@ -7,7 +7,7 @@ import {
 } from '../util.js';
 import {
   table, sheet, field, button, readForm, toast, fail, confirmSheet, statusTag, tag,
-  twoLine, search, segment, keyValue,
+  twoLine, search, segment, keyValue, stickerCluster,
 } from '../ui.js';
 import { openInvoiceFor } from './invoices.js';
 
@@ -30,10 +30,13 @@ export default {
 
     root.appendChild(el('div', { class: 'view' }, [
       el('div', { class: 'viewhead' }, [
-        el('div', {}, [
-          el('span', { class: 'cap cap--muted',
-            text: `${upcoming.length} upcoming · ${store.bookings.length} total` }),
-          el('h1', { text: 'Scheduling' }),
+        el('div', { class: 'viewhead__title' }, [
+          stickerCluster([['calendar', 'blue'], ['star', 'mint'], ['ticket', 'lavender']]),
+          el('div', {}, [
+            el('span', { class: 'cap cap--muted',
+              text: `${upcoming.length} upcoming · ${store.bookings.length} total` }),
+            el('h1', { text: 'Scheduling' }),
+          ]),
         ]),
         el('div', { class: 'row row--tight' }, [
           segment([['calendar', 'Calendar'], ['list', 'List']], state.mode,
@@ -111,7 +114,7 @@ function calendarView(cur) {
     el('div', { class: 'row', style: 'margin-top:4px' }, [
       el('span', { class: 'cap cap--muted', text: 'Legend' }),
       legend('Confirmed', 'cal__ev--confirmed'),
-      legend('Inquiry', ''),
+      legend('Inquiry', 'cal__ev--inquiry'),
       legend('Completed', 'cal__ev--completed'),
       legend('Cancelled', 'cal__ev--cancelled'),
     ]),
@@ -137,8 +140,7 @@ function listView(cur) {
         (v) => { state.status = v; rerender(); }),
       button('Export CSV', () => exportCSV(rows, cur), { quiet: true }),
     ]),
-    el('div', { class: 'frame' }, [
-      table([
+    table([
         { label: 'Event date', cell: (b) => twoLine(fmtDate(b.event_date, 'dow'),
             `${fmtTime(b.start_time)} · ${relativeDay(b.event_date)}`) },
         { label: 'Client', cell: (b) => twoLine(b.client_name, b.reference) },
@@ -154,7 +156,6 @@ function listView(cur) {
         onRow: (b) => editBooking(store.booking(b.id)),
         empty: 'No bookings match this filter.',
       }),
-    ]),
   ]);
 }
 
@@ -213,7 +214,7 @@ export async function editBooking(booking, defaults = {}) {
   f.notes = field('Notes', 'notes',
     { type: 'textarea', value: booking?.notes || '', span: true, rows: 3 });
 
-  const totalLine = el('div', { class: 'panel frame span2', style: 'padding:13px 19px' });
+  const totalLine = el('div', { class: 'card span2', style: 'padding:16px 24px' });
   const clashLine = el('div', { class: 'span2' });
 
   for (const key of ['client_id', 'package_id', 'event_date', 'start_time', 'end_time',
@@ -241,7 +242,7 @@ export async function editBooking(booking, defaults = {}) {
     const clashes = store.clashesFor(iso, booking?.id);
     // replaceChildren() would turn a null into the text "null" — pass no child instead.
     clashLine.replaceChildren(...(clashes.length
-      ? [el('div', { class: 'frame', style: 'padding:11px 13px' }, [
+      ? [el('div', { class: 'card', style: 'padding:16px 20px' }, [
           el('span', { class: 'cap', text: `Already booked on ${fmtDate(iso)}` }),
           ...clashes.map((c) => el('div', { class: 'alt',
             text: `${fmtTime(c.start_time)} — ${c.client_name} · ${c.package_name} · ${c.venue || 'venue TBC'}` })),
@@ -340,8 +341,8 @@ function paymentsPanel(booking, cur) {
   const v = store.view(booking);
   const rows = store.paymentsFor(booking.id);
 
-  const box = el('section', { class: 'frame', style: 'padding:19px' }, [
-    el('div', { class: 'panel__head' }, [
+  const box = el('section', { class: 'card', style: 'padding:24px' }, [
+    el('div', { class: 'card__head' }, [
       el('span', { class: 'cap cap--muted',
         text: `Payments — ${money(v.amount_paid, cur)} of ${money(v.total_amount, cur)} received` }),
       el('div', { class: 'row row--tight' }, [
@@ -354,7 +355,7 @@ function paymentsPanel(booking, cur) {
     ]),
     table([
       { label: 'Date', cell: (p) => fmtDate(p.paid_on) },
-      { label: 'Kind', cell: (p) => tag(p.kind, p.kind === 'refund' ? 'ghost' : 'plain') },
+      { label: 'Kind', cell: (p) => tag(p.kind, p.kind === 'refund' ? 'ember' : 'sky') },
       { label: 'Method', cell: (p) => titleCase(p.method) },
       { label: 'Reference', cell: (p) => p.reference || '—' },
       { label: 'Amount', align: 'right', cell: (p) => money(p.amount, cur) },
