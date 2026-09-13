@@ -119,7 +119,7 @@ export default {
         el('span', { class: 'cap cap--muted',
           text: `Payment ledger — ${ledger.length} entries${refunds ? ` · ${money(refunds, cur)} refunded` : ''}` }),
         el('div', { class: 'row row--tight' }, [
-          el('div', { style: 'width:240px' }, [
+          el('div', { class: 'grow', style: 'max-width:240px' }, [
             search('Search client or reference…', state.q, (v) => { state.q = v; rerender(); }),
           ]),
           segment([['all', 'All'], ...PAY_METHODS.map((m) => [m, titleCase(m)])], state.method,

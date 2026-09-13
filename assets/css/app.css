@@ -651,19 +651,211 @@ input[type='checkbox'] { width: 18px; height: 18px; accent-color: #000; }
   .cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 780px) {
-  :root { --t-body: 14px; --t-head: 24px; }
   .cols-2, .cols-3, .cols-4 { grid-template-columns: minmax(0, 1fr); }
   .formgrid { grid-template-columns: minmax(0, 1fr); }
-  main { padding: 0 var(--s12) var(--s16); }
+  main { padding: 0 var(--s12) calc(var(--s16) + env(safe-area-inset-bottom)); }
   .view { padding: var(--s20); border-radius: var(--r-card); }
-  .nav { padding: var(--s12); gap: var(--s8); }
-  .nav__links { order: 3; width: 100%; }
-  .nav__link { padding: 9px var(--s12); }
   .cal__day { min-height: 74px; padding: 5px; }
-  .cal__ev { font-size: 9px; padding: 4px 6px; }
   .stickers svg { width: 32px; height: 32px; }
-  .sheet__head, .sheet__body, .sheet__foot { padding: var(--s20); }
   .doc { padding: var(--s20); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Phones — iPhone 16 Pro is 402 × 874 CSS px                          */
+/* ------------------------------------------------------------------ */
+.only-mobile { display: none; }
+
+@media (max-width: 600px) {
+  :root {
+    --t-cap:  10.5px;
+    --t-sm:   12px;
+    --t-body: 13px;
+    --t-md:   14px;
+    --t-sub:  17px;
+    --t-head: 20px;
+    --t-big:  34px;
+  }
+  html, body { overflow-x: hidden; }
+  body { -webkit-tap-highlight-color: transparent; }
+  .only-mobile { display: block; }
+  .only-desktop { display: none !important; }
+
+  /* Marquee + nav: one brand row, one swipeable row of pills */
+  .marquee { padding: 6px 0; font-size: 10px; padding-top: calc(6px + env(safe-area-inset-top)); }
+  .nav {
+    top: 0;
+    padding: var(--s8) var(--s12);
+    padding-left: calc(var(--s12) + env(safe-area-inset-left));
+    padding-right: calc(var(--s12) + env(safe-area-inset-right));
+    gap: var(--s8);
+    flex-wrap: wrap;
+  }
+  .nav__mark { font-size: 12px; padding: 4px 10px 4px 4px; gap: 5px; flex: 0 0 auto; }
+  .nav__badge { width: 22px; height: 22px; font-size: 12px; }
+  .nav { flex-wrap: wrap; row-gap: var(--s8); }
+  .nav__right { margin-left: auto; gap: 4px; flex-wrap: nowrap; min-width: 0; }
+  .nav__right .tag { padding: 5px 7px; font-size: 9px; letter-spacing: 0.02em; }
+  .nav__right .nav__link { font-size: 9.5px; padding: 7px 9px; letter-spacing: 0.02em; }
+  .nav__right .cap { display: none; }
+  .nav__links {
+    order: 3;
+    width: calc(100% + 2 * var(--s12));
+    margin: 0 calc(-1 * var(--s12));
+    padding: 0 var(--s12) 2px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav__links::-webkit-scrollbar { display: none; }
+  .nav__link { font-size: 10.5px; padding: 8px 12px; flex: 0 0 auto; }
+
+  /* Page */
+  main { padding: 0 var(--s8) calc(var(--s12) + env(safe-area-inset-bottom)); }
+  .view { padding: var(--s16) 14px; border-radius: var(--r-card); }
+  .viewhead { gap: var(--s12); margin-bottom: var(--s16); align-items: stretch; }
+  .viewhead__title { gap: var(--s12); flex-wrap: nowrap; }
+  .viewhead > .row, .viewhead > .segment { width: 100%; }
+  h1 { font-size: var(--t-big); line-height: 0.86; }
+  .stickers svg { width: 26px; height: 26px; margin-left: -7px; border-radius: 10px; }
+
+  .grid { gap: 10px; }
+  /* Stat rows: small figures pair up two-across; a hero figure keeps the full width */
+  .grid.cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid.cols-4 > .card:has(.stat__value--lg) { grid-column: 1 / -1; }
+  .grid.cols-4 .stat__value:not(.stat__value--lg) { font-size: 18px; overflow-wrap: anywhere; }
+  .grid.cols-4 .stat__note { font-size: 11px; }
+  .card { padding: var(--s16); border-radius: 18px; }
+  .card__head { margin-bottom: var(--s12); gap: var(--s8); }
+  .stat__value { font-size: 20px; }
+  .stat__value--lg { font-size: 34px; }
+  .stat__note { margin-top: 4px; }
+  .mb { margin-bottom: var(--s16); }
+  [style*='margin-bottom:24px'] { margin-bottom: var(--s16) !important; }
+
+  /* Controls: smaller text, still thumb-sized */
+  .btn { font-size: 10.5px; padding: 11px 14px; min-height: 38px; }
+  .btn--icon { padding: 8px 12px; min-height: 34px; }
+  .row { gap: var(--s8); }
+  .row > .grow[style*='max-width'] { max-width: none !important; flex-basis: 100%; }
+  /* Toolbars that sit in a card header take the full width and wrap inside it */
+  .card__head > .row { width: 100%; min-width: 0; }
+  .card__head > .row > * { min-width: 0; }
+  .card__head .segment { width: 100%; }
+  .segment { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .segment::-webkit-scrollbar { display: none; }
+  .segment button { font-size: 10.5px; padding: 9px 12px; flex: 0 0 auto; }
+  .tag { font-size: 9.5px; padding: 5px 9px; }
+  .field > label { font-size: 10.5px; }
+  /* iOS Safari zooms the page into any field under 16px — keep inputs at 16. */
+  input[type='text'], input[type='number'], input[type='date'], input[type='time'],
+  input[type='email'], input[type='tel'], input[type='password'], input[type='search'],
+  select, textarea { font-size: 16px; padding: 10px 14px; }
+
+  /* Tables become stacked cards: one row = one card, label left, value right */
+  .tablewrap { border-radius: 18px; overflow: visible; }
+  table.data { min-width: 0; font-size: var(--t-sm); }
+  table.data thead { display: none; }
+  table.data, table.data tbody, table.data tr, table.data td { display: block; width: 100%; }
+  table.data tr { padding: 10px 14px; border-bottom: 1px solid var(--mist); }
+  table.data tbody tr:last-child { border-bottom: 0; }
+  table.data td {
+    display: flex; justify-content: space-between; align-items: center; gap: var(--s12);
+    padding: 5px 0; border: 0; text-align: right !important;
+  }
+  table.data td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; color: #5f5f5f; text-align: left;
+  }
+  table.data td[data-label='']::before { display: none; }
+  table.data td[data-label=''] { justify-content: flex-end; }
+  /* The first column is the row's title — give it the full width */
+  table.data td:first-child { justify-content: flex-start; text-align: left !important; padding-bottom: 7px; }
+  table.data td:first-child::before { display: none; }
+  table.data td > div { min-width: 0; }
+  table.data .strong { white-space: normal; font-size: var(--t-md); }
+  table.data .cap { white-space: normal; }
+  table.data tbody tr:hover td { background: transparent; }
+  .empty { padding: var(--s24) var(--s16); }
+
+  /* Calendar: events shrink to colour bars; the agenda below carries the detail */
+  .cal__dow { padding: 7px 0; text-align: center; font-size: 9.5px; letter-spacing: 0; }
+  .cal__day { min-height: 52px; padding: 4px 3px; gap: 3px; align-items: center; }
+  .cal__num { font-size: 11.5px; padding: 2px 6px; align-self: center; }
+  .cal__ev { font-size: 0; height: 6px; padding: 0; width: 100%; min-width: 0; }
+  .cal__legend .cal__ev { font-size: 9.5px; height: auto; width: auto; padding: 4px 8px; }
+  .agenda { display: flex; flex-direction: column; gap: var(--s8); }
+  .agenda__item {
+    display: flex; align-items: center; gap: var(--s12);
+    width: 100%; text-align: left; font-family: inherit; color: var(--carbon);
+    background: var(--paper); border: var(--line); border-radius: 16px;
+    padding: 10px 12px; cursor: pointer;
+  }
+  .agenda__date {
+    flex: 0 0 44px; text-align: center; border: var(--line); border-radius: 12px;
+    padding: 5px 0; font-weight: 700; line-height: 1;
+  }
+  .agenda__date b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 20px; margin-top: 3px; }
+  .agenda__date span { font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* Bars */
+  .bars { gap: 9px; }
+  .bar__track { height: 14px; }
+
+  /* Sheets open as full-height bottom sheets */
+  .scrim { padding: 0; align-items: flex-end; padding-top: calc(12px + env(safe-area-inset-top)); }
+  .sheet, .sheet--wide {
+    width: 100%; margin: 0; min-height: 100%;
+    border-radius: 24px 24px 0 0; border-bottom: 0;
+    display: flex; flex-direction: column; overflow: visible;
+  }
+  .sheet__head { padding: 14px 16px; border-radius: 24px 24px 0 0; z-index: 2; flex-wrap: nowrap; }
+  .sheet__head h2 { font-size: var(--t-sub); line-height: 1.15; }
+  .sheet__body { padding: var(--s16); flex: 1 1 auto; }
+  .sheet__foot {
+    position: sticky; bottom: 0; z-index: 2;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    gap: var(--s8);
+  }
+  .sheet__foot > .row { flex-wrap: wrap; }
+  .sheet__foot > .row:last-child { margin-left: auto; justify-content: flex-end; }
+
+  /* Invoice line-item editor stacks */
+  .lineitem { grid-template-columns: 1fr 1fr !important; }
+  .lineitem > textarea { grid-column: 1 / -1; }
+  .lineitem__amount { padding-top: 0 !important; grid-column: 1 / 2; }
+  .lineitem > .btn { justify-self: end; width: auto; min-width: 44px; }
+  .lineitem-head { display: none !important; }
+
+  /* Invoice document */
+  .doc { padding: var(--s16); border-radius: 16px; }
+  .doc__head { flex-direction: column; gap: var(--s12); }
+  .doc__head .right { text-align: left; }
+  .doc__title { font-size: 44px; }
+  .doc__meta { grid-template-columns: minmax(0, 1fr); gap: var(--s12); }
+  .doc__meta .right { text-align: left; }
+  .doc table { font-size: 12px; }
+  .doc table th:nth-child(3), .doc table td:nth-child(3) { display: none; }
+  .doc__totals { width: 100%; }
+
+  /* Toast and gate clear the home indicator */
+  /* Toast drops from the top on phones — at the bottom it covered the sheet's Save button */
+  .toast {
+    left: 12px; right: 12px; bottom: auto; top: calc(10px + env(safe-area-inset-top));
+    max-width: none; text-align: center; font-size: 10.5px; z-index: 300;
+  }
+  .gate { padding: var(--s12); padding-top: calc(var(--s12) + env(safe-area-inset-top)); }
+  .gate__box { padding: var(--s20); border-radius: 24px; }
+}
+
+/* Touch screens have no hover — don't leave rows and pills stuck highlighted */
+@media (hover: none) {
+  .btn:hover, .nav__link:hover, .segment button:hover { background: var(--paper); }
+  .btn--solid:hover { background: var(--carbon); }
+  .nav__link[aria-current='page']:hover, .segment button[aria-pressed='true']:hover { background: var(--carbon); }
+  table.data tbody tr:hover td { background: transparent; }
 }
 
 /* ------------------------------------------------------------------ */
@@ -680,4 +872,10 @@ input[type='checkbox'] { width: 18px; height: 18px; accent-color: #000; }
   .sheet__body { padding: 0; }
   .doc { border: 0; padding: 0; border-radius: 0; }
   .view { padding: 0; border: 0; }
+  .doc table th, .doc table td { display: table-cell !important; }
+  .doc__head { flex-direction: row !important; }
+  .doc__meta { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .doc__head .right, .doc__meta .right { text-align: right !important; }
+  .scrim { padding-top: 0 !important; }
+  .sheet { min-height: 0 !important; }
 }

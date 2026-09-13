@@ -260,8 +260,10 @@ function editInvoice(invoice) {
       desc.value = line.description;
       desc.addEventListener('input', () => { line.description = desc.value; });
 
-      const qty = el('input', { type: 'number', step: '0.01', value: line.quantity });
-      const price = el('input', { type: 'number', step: '0.01', value: line.unit_price });
+      const qty = el('input', { type: 'number', step: '0.01', value: line.quantity,
+        placeholder: 'Qty', 'aria-label': 'Quantity', inputmode: 'decimal' });
+      const price = el('input', { type: 'number', step: '0.01', value: line.unit_price,
+        placeholder: 'Unit price', 'aria-label': 'Unit price', inputmode: 'decimal' });
       const amount = el('div', { class: 'strong num right',
         text: money(num(line.quantity) * num(line.unit_price), cur) });
 
@@ -275,11 +277,11 @@ function editInvoice(invoice) {
       price.addEventListener('input', recalc);
 
       return el('div', {
-        class: 'card',
+        class: 'card lineitem',
         style: 'display:grid;grid-template-columns:minmax(0,3fr) 90px 130px 130px 40px;gap:9px;padding:9px;align-items:start',
       }, [
         desc, qty, price,
-        el('div', { style: 'padding-top:9px' }, [amount]),
+        el('div', { class: 'lineitem__amount', style: 'padding-top:9px' }, [amount]),
         button('×', () => {
           lines.splice(idx, 1);
           if (!lines.length) lines.push({ id: null, description: '', quantity: 1, unit_price: 0 });
@@ -325,7 +327,7 @@ function editInvoice(invoice) {
           }, { quiet: true }),
         ].filter(Boolean)),
       ]),
-      el('div', { class: 'cap cap--muted', style: 'display:grid;grid-template-columns:minmax(0,3fr) 90px 130px 130px 40px;gap:9px;padding:0 9px 5px' }, [
+      el('div', { class: 'cap cap--muted lineitem-head', style: 'display:grid;grid-template-columns:minmax(0,3fr) 90px 130px 130px 40px;gap:9px;padding:0 9px 5px' }, [
         el('span', { text: 'Description' }), el('span', { text: 'Qty' }),
         el('span', { text: 'Unit price' }), el('span', { class: 'right', text: 'Amount' }), el('span'),
       ]),

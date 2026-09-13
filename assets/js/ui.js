@@ -259,6 +259,8 @@ export function table(columns, rows, { onRow, empty = 'Nothing here yet.' } = {}
       return el('td', {
         style: c.align === 'right' ? 'text-align:right' : null,
         class: c.align === 'right' ? 'num' : null,
+        // Read by CSS on phones, where each row becomes a labelled card.
+        'data-label': c.label || '',
       }, [typeof v === 'string' || typeof v === 'number' ? String(v) : v]);
     }));
     if (onRow) {

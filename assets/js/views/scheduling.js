@@ -111,13 +111,45 @@ function calendarView(cur) {
         text: `${monthBookings.length} events · ${money(sum(monthBookings, (b) => b.total_amount), cur)} booked` }),
     ]),
     grid,
-    el('div', { class: 'row', style: 'margin-top:4px' }, [
+    // On phones the grid only shows colour bars, so list the month's events too.
+    agendaFor(m),
+    el('div', { class: 'row cal__legend', style: 'margin-top:4px' }, [
       el('span', { class: 'cap cap--muted', text: 'Legend' }),
       legend('Confirmed', 'cal__ev--confirmed'),
       legend('Inquiry', 'cal__ev--inquiry'),
       legend('Completed', 'cal__ev--completed'),
       legend('Cancelled', 'cal__ev--cancelled'),
     ]),
+  ]);
+}
+
+function agendaFor(month) {
+  const cur = store.currency;
+  const events = sortBy(
+    store.bookings.filter((b) => b.event_date.slice(0, 7) === monthKey(month)),
+    (b) => b.event_date + (b.start_time || ''),
+  ).map((b) => store.view(b));
+
+  return el('div', { class: 'only-mobile' }, [
+    el('span', { class: 'cap cap--muted', style: 'margin-bottom:8px',
+      text: events.length ? `${events.length} event${events.length === 1 ? '' : 's'} this month` : 'No events this month' }),
+    el('div', { class: 'agenda' }, events.map((b) => {
+      const d = fromISO(b.event_date);
+      return el('button', { class: 'agenda__item', type: 'button', onclick: () => editBooking(store.booking(b.id)) }, [
+        el('span', { class: `agenda__date cal__ev--${b.status}` }, [
+          el('span', { text: DOW[d.getDay()] }),
+          el('b', { text: String(d.getDate()) }),
+        ]),
+        el('span', { class: 'grow' }, [
+          el('div', { class: 'strong', text: b.client_name }),
+          el('span', { class: 'alt muted', text: `${fmtTime(b.start_time)} · ${b.package_name}` }),
+        ]),
+        el('span', { class: 'stack', style: 'gap:4px;align-items:flex-end' }, [
+          statusTag(b.status),
+          el('span', { class: 'alt num', text: money(b.total_amount, cur) }),
+        ]),
+      ]);
+    })),
   ]);
 }
 
